@@ -96,31 +96,38 @@
 
 消息数据库默认位于 `%USERPROFILE%/Documents/Tencent Files/{qq}/nt_qq/nt_db/` 目录下，其中 `{qq}` 为 QQ 号。复制该目录下的 `nt_msg.db` 文件到本项目的 `./data/` 目录下。
 
-1. 在复制过来的 `nt_msg.db` 所在文件夹运行以下命令，去除文件中多余的头部。如果数据库文件较大，可能会花费较长时间。
+1. 在复制过来的 `nt_msg.db` 所在文件夹运行以下命令，分离数据库头部与数据库本体。如果数据库文件较大，可能会花费较长时间。
 
-使用命令提示符（CMD）：
+使用 PowerShell 7：
 
-```cmd
-type nt_msg.db | more +1025 > nt_msg.clean.db
+```powershell
+$content = Get-Content -Path nt_msg.db -AsByteStream -Raw
+$content_header = $content[0..1024]
+$content_body = $content[1024..($content.length-1)]
+Set-Content -Path nt_msg.header.txt -Value $content_header -AsByteStream
+Set-Content -Path nt_msg.body.db -Value $content_body -AsByteStream
 ```
 
 如果安装有 WSL，可以在 WSL 中转到对应文件夹运行以下命令：
 
 ```bash
-cat nt_msg.db | tail -c +1025 > nt_msg.clean.db
+cat nt_msg.db | head -c 1024 > nt_msg.header.txt
+cat nt_msg.db | tail -c +1025 > nt_msg.body.db
 ```
 
-2. 打开 `DB Browser for SQLCipher.exe`，点击 "File" 菜单中的 "Open Database..." 菜单项，打开 `nt_msg.clean.db` 文件。
+2. 使用文本编辑器打开文件 `nt_msg.header.txt`，如果存在文本 `HMAC_` 则记录对应的 HMAC 算法。例如 `HMAC_SHA1` 对应的 HMAC 算法为 `SHA1`，如果没有对应文本则为 `SHA512`。
 
-3. 在弹出的 "SQLCipher encryption" 窗口中的 Password 输入框中输入数据库密码，Encryption settings 选择 "Custom"，修改 KDF iterations 为 `4000`，点击 "OK" 按钮。
+3. 打开 `DB Browser for SQLCipher.exe`，点击 "File" 菜单中的 "Open Database..." 菜单项，打开 `nt_msg.body.db` 文件。
+
+4. 在弹出的 "SQLCipher encryption" 窗口中的 Password 输入框中输入数据库密码，Encryption settings 选择 "Custom"，修改 KDF iterations 为 `4000`，修改 HMAC algorithm 为第 2 步所获取的 HMAC 算法，点击 "OK" 按钮。
 
 ![](./images/sql_0.png)
 
-4. 在 Database Structure 标签页中，可以查看数据库中的表。其中 `c2c_msg_table` 表为私聊消息表；`group_msg_table` 表为群聊消息表。
+5. 在 Database Structure 标签页中，可以查看数据库中的表。其中 `c2c_msg_table` 表为私聊消息表；`group_msg_table` 表为群聊消息表。
 
 ![](./images/sql_1.png)
 
-5. 在 Browse Data 标签页中，可以查看表中的数据；在 Execute SQL 标签页中，可以执行 SQL 语句。如果数据量不大，可以直接使用 SQL 语句进行数据分析。数据量较大或需要进行消息内容分析时，需要先进行数据过滤，然后导出。需要过滤单个群聊的 2023 年数据时，在 Execute SQL 标签页中执行（快捷键 <kbd>F5</kbd>）以下 SQL 语句，其中 `{group_id}` 为群号。
+6. 在 Browse Data 标签页中，可以查看表中的数据；在 Execute SQL 标签页中，可以执行 SQL 语句。如果数据量不大，可以直接使用 SQL 语句进行数据分析。数据量较大或需要进行消息内容分析时，需要先进行数据过滤，然后导出。需要过滤单个群聊的 2023 年数据时，在 Execute SQL 标签页中执行（快捷键 <kbd>F5</kbd>）以下 SQL 语句，其中 `{group_id}` 为群号。
 
 ```sql
 SELECT *
@@ -130,15 +137,15 @@ AND "40058" >= 1672502400
 AND "40058" < 1704038400
 ```
 
-6. 待执行生成后，将结果保存为 view 并命名，如 `group_export`。
+7. 待执行生成后，将结果保存为 view 并命名，如 `group_export`。
 
 ![](./images/sql_2.png)
 
-7. 在 "File" 菜单中选择 "Export" 菜单项，点击 "Table(s) to JSON..."。
+8. 在 "File" 菜单中选择 "Export" 菜单项，点击 "Table(s) to JSON..."。
 
 ![](./images/sql_3.png)
 
-8. 选择刚刚保存的 view，点击 "Save" 按钮，选择路径为本项目的 `./data/` 目录，等待导出完成。
+9. 选择刚刚保存的 view，点击 "Save" 按钮，选择路径为本项目的 `./data/` 目录，等待导出完成。
 
 ![](./images/sql_4.png)
 
