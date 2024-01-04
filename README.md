@@ -98,7 +98,7 @@
 
 1. 在复制过来的 `nt_msg.db` 所在文件夹运行以下命令，分离数据库头部与数据库本体。如果数据库文件较大，可能会花费较长时间。
 
-使用 PowerShell：
+使用 PowerShell 7：
 
 ```powershell
 $content = Get-Content -Path nt_msg.db -AsByteStream -Raw
@@ -115,7 +115,7 @@ cat nt_msg.db | head -c 1024 > nt_msg.header.txt
 cat nt_msg.db | tail -c +1025 > nt_msg.body.db
 ```
 
-2. 使用文本编辑器打开文件 `nt_msg.header.txt`，搜索文本 `HMAC_` 获取数据库所使用的 HMAC 算法。例如 `HMAC_SHA512` 对应的 HMAC 算法为 `SHA512`。
+2. 使用文本编辑器打开文件 `nt_msg.header.txt`，如果存在文本 `HMAC_` 则记录对应的 HMAC 算法。例如 `HMAC_SHA1` 对应的 HMAC 算法为 `SHA1`，如果没有对应文本则为 `SHA512`。
 
 3. 打开 `DB Browser for SQLCipher.exe`，点击 "File" 菜单中的 "Open Database..." 菜单项，打开 `nt_msg.body.db` 文件。
 
