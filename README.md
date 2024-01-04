@@ -137,15 +137,15 @@ AND "40058" >= 1672502400
 AND "40058" < 1704038400
 ```
 
-6. 待执行生成后，将结果保存为 view 并命名，如 `group_export`。
+7. 待执行生成后，将结果保存为 view 并命名，如 `group_export`。
 
 ![](./images/sql_2.png)
 
-7. 在 "File" 菜单中选择 "Export" 菜单项，点击 "Table(s) to JSON..."。
+8. 在 "File" 菜单中选择 "Export" 菜单项，点击 "Table(s) to JSON..."。
 
 ![](./images/sql_3.png)
 
-8. 选择刚刚保存的 view，点击 "Save" 按钮，选择路径为本项目的 `./data/` 目录，等待导出完成。
+9. 选择刚刚保存的 view，点击 "Save" 按钮，选择路径为本项目的 `./data/` 目录，等待导出完成。
 
 ![](./images/sql_4.png)
 
